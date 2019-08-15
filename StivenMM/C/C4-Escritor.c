@@ -1,7 +1,7 @@
 /**
- * Programa que carga en un PIC unn sistema de autenticación por clave.
+ * Programa que permite escribir en un LCD utilizando el Teclado Matricial.
  * 
- * @author Stiven Muñoz Murillo
+ * @author Stiven MuÃ±oz Murillo
  * @version 16/07/2019
  */
 
