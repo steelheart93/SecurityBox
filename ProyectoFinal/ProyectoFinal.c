@@ -3,6 +3,14 @@
  * 
  * @author Stiven Muñoz Murillo
  * @version 16/07/2019
+ * 
+ * 
+ * @autot: el loko
+ * @version 16/07/2019
+ * Nota: El loco se propone a crear un metodo que pueda leer y escribir de la 
+ * EEPROM
+ * 
+ * 
  */
 
 #pragma config FOSC = XT        // Oscillator Selection bits (XT oscillator)
@@ -53,6 +61,40 @@ void mensajeCorto(char mensaje[]) {
     }
 }
 
+
+
+//Metodo del loco
+//Donde es la posicion de la EEPROM 
+//dato es el dato que se va a meter
+void meterloEnLaEEPROM(int donde, int dato){
+    mensajeCorto("Metiendo en la EEPROM");
+    
+    //Si esta listo para escribir
+    if(EECON1bits.WR == 0){
+        
+        EEADR = donde; // posicion en la que voy a escribir
+        EEDATA = dato; // que le voy a escribir
+        
+        //Habilito para escritura
+        EECON1bits.EEPGD = 0;
+        EECON1bits.WREN = 1;
+        
+        //Paso obligatorio
+        GIE = 0; //desactivo las interrupciones
+        EECON2 = 85; //alisto motores para escritura
+        EECON2 = 170; 
+        EECON1bits.WR = 1; //Le digo que estoy escribiendo
+        
+        //Habilito interrupciones
+        GIE = 1;
+        //Desabilito la escritura
+        EECON1bits.WREN = 0;
+        
+    }
+    
+            
+}
+
 void __interrupt() listener() {
     int leer = PORTA;
     leer = PORTB;
@@ -74,7 +116,10 @@ void __interrupt() listener() {
         comando(1);
     } else {
         contador = 0;
-        mensajeCorto("No!!!");
+        meterloEnLaEEPROM(0,1);
+        meterloEnLaEEPROM(1,0);
+        meterloEnLaEEPROM(2,11);
+        meterloEnLaEEPROM(3,11);
         __delay_ms(1000);
         comando(1);
     }
