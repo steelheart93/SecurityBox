@@ -1,7 +1,7 @@
 /**
  * Proyecto final de Microprocesadores.
  * 
- * @author Stiven Mu駉z Murillo
+ * @author Stiven Mu帽oz Murillo
  * @version 19/08/2019
  */
 
@@ -76,7 +76,7 @@ void enviarDato(int dato) {
 }
 
 /**
- * Funci髇 que pinta asteriscos.
+ * Funci贸n que pinta asteriscos.
  * 
  * @param cantidad
  */
@@ -100,9 +100,9 @@ void mensajeCorto(char mensaje[]) {
 }
 
 /**
- * Funci髇 que escribe en la EEPROM.
+ * Funci贸n que escribe en la EEPROM.
  * 
- * @param Address, direcci髇 del bloque de memoria donde se va a escribir.
+ * @param Address, direcci贸n del bloque de memoria donde se va a escribir.
  * @param Data, caracter que se va escribir en dicho bloque de memoria.
  */
 void EEPROM_Write(int Address, char Data) {
@@ -121,9 +121,9 @@ void EEPROM_Write(int Address, char Data) {
 }
 
 /**
- * Funci髇 que lee de la EEPROM.
+ * Funci贸n que lee de la EEPROM.
  * 
- * @param Address, direcci髇 del bloque de memoria de donde voy a leer.
+ * @param Address, direcci贸n del bloque de memoria de donde voy a leer.
  * @return Contenido de dicho bloque de memoria.
  */
 int EEPROM_Read(int Address) {
@@ -218,7 +218,7 @@ void __interrupt() listener() {
             __delay_ms(3000);
             enviarComando(1);
         } else if (RB5 == 0) {
-            teclas[contador] = '7';
+            teclas[contador] = '0';
             pintarAsteriscos(contador);
             contador++;
             __delay_ms(1000);
@@ -274,7 +274,7 @@ void __interrupt() listener() {
 }
 
 /**
- * Funci髇 principal del PIC.
+ * Funci贸n principal del PIC.
  */
 void main() {
     ADCON1 = 7; // Declaro el puerto A como Digital
@@ -295,7 +295,7 @@ void main() {
 
     SYNC = 0; // Sincronia-1, Asincronia-0
     BRGH = 1; // Velocidad de Transmision: 0-Alta, 1-Baja
-    SPBRG = 25; // Bits de configuraci髇 del puerto Serial
+    SPBRG = 25; // Bits de configuraci贸n del puerto Serial
 
     if (EEPROM_Read(0) == 255 || EEPROM_Read(3) == 255) {
         mensajeCorto("EEPROM vacia");
