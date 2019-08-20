@@ -74,7 +74,6 @@ void limpiar() {//SE ENCARGA DE LIMPIAR EL LCD
     pulsador();
 }
 
-
 void transmitirDato(int dato) {
     TXREG = dato;
     TXEN = 1;
@@ -110,54 +109,6 @@ void escribirMensajeConTiempoEspera(char dato[]) {
     __delay_ms(120);
 }
 
-void compararClaves() {
-
-    if (strcmp(Clave_ingresada, Clave_por_defecto) == 0) {
-
-        escribirMensajeConTiempoEspera("clave Correta!!");
-        escribirMensajeConTiempoEspera("puede abrir caja");
-        claveCorrecta = 1;
-
-
-    } else {
-
-        escribirMensajeConTiempoEspera("clave incorrecta");
-        escribirMensajeConTiempoEspera(mensaje_ingreso_clave_de_seguridad);
-        intentos++;
-    }
-
-    //    Clave_ingresada[4]="";
-    vaciarVector();
-
-}
-
-void cambioDeClave() {
-    limpiar();
-    escribirMensaje("cambiando Clave");
-    __delay_ms(200);
-    //aqui se hacen las validaciones la contrasena
-    if (strlen(Clave_ingresada) > 3 && strlen(Clave_ingresada) <= 9) {
-        for (int x = 0; x < strlen(Clave_ingresada); x++) {
-            Clave_por_defecto[x] = Clave_ingresada[x];
-        }
-
-        limpiar();
-        escribirMensaje("exito");
-        estado_o_tipo_procedimiento = 0;
-        intentos = 0;
-        limpiar();
-        escribirMensaje(mensaje_ingreso_clave_de_seguridad);
-        __delay_ms(200);
-    } else {
-        limpiar();
-        escribirMensaje("Error No valida");
-    }
-
-
-
-    vaciarVector();
-
-}
 //Metodo del loco
 //Donde es la posicion de la EEPROM 
 //dato es el dato que se va a meter
@@ -188,6 +139,80 @@ void meterloEnLaEEPROM(int donde, int dato) {
 
     }
 
+
+}
+//Metodo del loco
+//Donde es la posicion de la EEPROM
+//Esto retorna EEPROM[DONDE]
+
+int leerEEPROM(int donde) {
+
+
+    //Le digo que posicion de la EEPROM deseo leer
+    EEADR = donde;
+    //Le digo que voy a empezar a capturar
+    EECON1bits.EEPGD = 0;
+    //Hago que lea la EEPROM
+    EECON1bits.RD = 1;
+
+    //Ya fue leida ahora va a ser guardada en EEDATA
+    return EEDATA;
+}
+
+void compararClaves() {
+
+    if (strcmp(Clave_ingresada, Clave_por_defecto) == 0) {
+
+        escribirMensajeConTiempoEspera("clave Correta!!");
+        escribirMensajeConTiempoEspera("puede abrir caja");
+        claveCorrecta = 1;
+
+
+    } else {
+
+        escribirMensajeConTiempoEspera("clave incorrecta");
+        escribirMensajeConTiempoEspera(mensaje_ingreso_clave_de_seguridad);
+        intentos++;
+    }
+
+    //    Clave_ingresada[4]="";
+    vaciarVector();
+
+}
+
+void cambioDeClave() {
+    limpiar();
+    escribirMensaje("cambiando Clave");
+    __delay_ms(200);
+    //aqui se hacen las validaciones la contrasena
+    if (strlen(Clave_ingresada) > 3 && strlen(Clave_ingresada) <= 9) {
+        for (int x = 0; x < strlen(Clave_ingresada); x++) {
+            Clave_por_defecto[x] = Clave_ingresada[x];
+        }
+        int posicion = 0;
+        for (int g = 0; g < strlen(Clave_por_defecto); g++) {
+            meterloEnLaEEPROM(posicion, Clave_por_defecto[g]);
+            posicion++;
+        }
+
+
+
+
+        limpiar();
+        escribirMensaje("exito");
+        estado_o_tipo_procedimiento = 0;
+        intentos = 0;
+        limpiar();
+        escribirMensaje(mensaje_ingreso_clave_de_seguridad);
+        __delay_ms(200);
+    } else {
+        limpiar();
+        escribirMensaje("Error No valida");
+    }
+
+
+
+    vaciarVector();
 
 }
 
@@ -223,7 +248,7 @@ void __interrupt() interrupcion() {
         __delay_ms(200);
         limpiar();
         escribirMensaje(mensaje_ingreso_clave_de_seguridad);
-        
+
 
 
     }
@@ -263,13 +288,26 @@ void __interrupt() interrupcion() {
         switch (port) {
             case 231: //verifivamos que en el puerto b esta un 231  y sacamos un 0
                 //            PORTC = 0;
-                AnexarLetra('0');
-                meterloEnLaEEPROM(0, 1);
-                meterloEnLaEEPROM(1, 0);
-                meterloEnLaEEPROM(2, 11);
-                meterloEnLaEEPROM(3, 11);
-                __delay_ms(1000);
-                instrucion(1);
+                limpiar();
+                EscribirPalabra('2');
+                meterloEnLaEEPROM(0, '2');
+              
+//                __delay_ms(1000);
+//                instrucion(1);
+                break;
+
+
+            case 215://verifivamos que en el puerto b esta un 215  y sacamos un 1
+                //            PORTC = 1;
+                escribirMensajeConTiempoEspera("leido");
+                int captura = leerEEPROM(0);
+                if (captura == 46) {
+                    escribirMensajeConTiempoEspera("vacio");
+                } else {
+                   
+ EscribirPalabra(captura+48);
+
+                }
 
 
                 break;
@@ -393,12 +431,25 @@ void main(void) {
     GO = 1; //habilitaar lo de leer el puerto
 
 
-    //esribimos en la pantalla el mensaje de ingreso de clave de segurida
-    escribirMensaje(mensaje_ingreso_clave_de_seguridad);
+   
     SPEN = 1;
     transmitirMensaje("Proyecto Microprocesadores");
     SPEN = 0;
 
+
+    //Si la EEPROM esta vacia entonces escribimos
+//    escribirMensajeConTiempoEspera("EscribiendoEEprom");
+//    int captura = leerEEPROM(0);
+//    if (captura >= 33) {
+//        for (int i = 0; i < strlen(Clave_por_defecto); i++) {
+//            meterloEnLaEEPROM(i,Clave_por_defecto[i]);
+//        }
+//
+//    }
+
+
+ //esribimos en la pantalla el mensaje de ingreso de clave de segurida
+    escribirMensaje(mensaje_ingreso_clave_de_seguridad);
     while (1) {
         if (rotartextoPantalla == 1) {
             instrucion(24); //rota el display
